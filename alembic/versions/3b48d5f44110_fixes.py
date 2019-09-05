@@ -24,7 +24,7 @@ def downgrade(engine_name):
     globals()["downgrade_%s" % engine_name]()
 
 
-def upgrade_default():
+def upgrade_main():
     op.create_foreign_key(op.f('account_google_fk_account_id'), 'account_google', 'account', ['account_id'], ['id'])
     op.create_foreign_key(op.f('application_fk_account_id'), 'application', 'account', ['account_id'], ['id'])
     op.create_foreign_key(op.f('stats_lookups_fk_application_id'), 'stats_lookups', 'application', ['application_id'], ['id'])
@@ -54,7 +54,7 @@ def upgrade_default():
     op.alter_column('recording_acoustid', 'created', nullable=False)
 
 
-def downgrade_default():
+def downgrade_main():
     op.alter_column('recording_acoustid', 'created', nullable=True)
     op.alter_column('track_foreignid_source', 'created', nullable=True)
     op.alter_column('track_foreignid', 'created', nullable=True)
@@ -84,9 +84,9 @@ def downgrade_default():
     op.drop_constraint(op.f('account_google_fk_account_id'), 'account_google', type_='foreignkey')
 
 
-def upgrade_slow():
+def upgrade_import():
     pass
 
 
-def downgrade_slow():
+def downgrade_import():
     pass

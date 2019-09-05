@@ -24,19 +24,19 @@ def downgrade(engine_name):
     globals()["downgrade_%s" % engine_name]()
 
 
-def upgrade_default():
+def upgrade_main():
     op.add_column('account',
-        sa.Column('is_admin', sa.Boolean(), server_default=sa.text('false'), nullable=False)
+        sa.Column('is_admin', sa.Boolean(), server_main=sa.text('false'), nullable=False)
     )
 
 
-def downgrade_default():
+def downgrade_main():
     op.drop_column('account', 'is_admin')
 
 
-def upgrade_slow():
+def upgrade_import():
     pass
 
 
-def downgrade_slow():
+def downgrade_import():
     pass

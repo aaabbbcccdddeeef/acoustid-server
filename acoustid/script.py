@@ -60,7 +60,7 @@ class Script(object):
 
     @property
     def engine(self):
-        return self.db_engines['default']
+        return self.db_engines['main']
 
     def setup_logging(self):
         for logger_name, level in sorted(self.config.logging.levels.items()):

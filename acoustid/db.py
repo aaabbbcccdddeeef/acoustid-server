@@ -8,10 +8,10 @@ Session = sessionmaker()
 def get_bind_args(engines):
     binds = {}
     for table in metadata.sorted_tables:
-        bind_key = table.info.get('bind_key', 'default')
-        if bind_key != 'default':
+        bind_key = table.info.get('bind_key', 'main')
+        if bind_key != 'main':
             binds[table] = engines[bind_key]
-    return {'bind': engines['default'], 'binds': binds}
+    return {'bind': engines['main'], 'binds': binds}
 
 
 def get_session_args(script):

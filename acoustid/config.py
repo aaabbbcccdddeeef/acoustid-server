@@ -44,30 +44,36 @@ class BaseConfig(object):
 class DatabasesConfig(BaseConfig):
 
     def __init__(self):
-        self.databases = {
-            'default': DatabaseConfig(),
-            'slow': DatabaseConfig(),
-        }
+        self.modes = {'local', 'replica'}
+        self.names = {'main', 'import'}
+        self.databases = {}
+        for mode in self.modes:
+            self.databases[mode] = {}
+            for name in self.name:
+                self.databases[mode][name] = DatabaseConfig()
         self.use_two_phase_commit = False
 
     def create_engines(self, **kwargs):
+        mode = kwargs.pop('mode', 'local')
         engines = {}
-        for name, db_config in self.databases.items():
+        for name, db_config in self.databases[mode].items():
             engines[name] = db_config.create_engine(**kwargs)
         return engines
 
     def read_section(self, parser, section):
         if parser.has_option(section, 'two_phase_commit'):
             self.use_two_phase_commit = parser.getboolean(section, 'two_phase_commit')
-        for name, sub_config in self.databases.items():
-            sub_section = '{}:{}'.format(section, name)
-            sub_config.read_section(parser, sub_section)
+        for mode, db_configs in self.databases.items():
+            for name, sub_config in db_configs.items():
+                sub_section = '{}:{}{}'.format(section, name, '_' + mode if mode != 'local' else '')
+                sub_config.read_section(parser, sub_section)
 
     def read_env(self, prefix):
         read_env_item(self, 'use_two_phase_commit', prefix + 'TWO_PHASE_COMMIT', convert=str_to_bool)
-        for name, sub_config in self.databases.items():
-            sub_prefix = prefix + name.upper() + '_'
-            sub_config.read_env(sub_prefix)
+        for mode, db_configs in self.databases.items():
+            for name, sub_config in db_configs.items():
+                sub_prefix = prefix + name.upper() + '_' + (mode.upper() + '_' if mode != 'local' else '')
+                sub_config.read_env(sub_prefix)
 
 
 class DatabaseConfig(BaseConfig):

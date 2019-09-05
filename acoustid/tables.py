@@ -148,7 +148,7 @@ submission = Table('submission', metadata,
     Column('disc_no', Integer),
     Column('year', Integer),
 
-    info={'bind_key': 'slow'},
+    info={'bind_key': 'import'},
 )
 
 submission_result = Table('submission_result', metadata,
@@ -166,7 +166,7 @@ submission_result = Table('submission_result', metadata,
     Column('puid', UUID),
     Column('foreignid', String),
 
-    info={'bind_key': 'slow'},
+    info={'bind_key': 'import'},
 )
 
 stats = Table('stats', metadata,

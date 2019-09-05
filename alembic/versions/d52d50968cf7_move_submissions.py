@@ -28,20 +28,20 @@ def downgrade(engine_name):
     globals()["downgrade_%s" % engine_name]()
 
 
-def upgrade_default():
+def upgrade_main():
     op.rename_table('submission', 'submission_old')
 
 
-def downgrade_default():
+def downgrade_main():
     op.rename_table('submission_old', 'submission')
 
 
-def upgrade_slow():
+def upgrade_import():
     op.execute(CreateSequence(Sequence('submission_id_seq')))
     op.create_table('submission',
-        sa.Column('id', sa.Integer(), server_default=sa.text("nextval('submission_id_seq')"), nullable=False),
-        sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),
-        sa.Column('handled', sa.Boolean(), server_default=sa.text('false'), nullable=True),
+        sa.Column('id', sa.Integer(), server_main=sa.text("nextval('submission_id_seq')"), nullable=False),
+        sa.Column('created', sa.DateTime(timezone=True), server_main=sa.text('CURRENT_TIMESTAMP'), nullable=False),
+        sa.Column('handled', sa.Boolean(), server_main=sa.text('false'), nullable=True),
         sa.Column('account_id', sa.Integer(), nullable=False),
         sa.Column('application_id', sa.Integer(), nullable=False),
         sa.Column('application_version', sa.String(), nullable=True),
@@ -84,6 +84,6 @@ def upgrade_slow():
         range_from = range_to
 
 
-def downgrade_slow():
+def downgrade_import():
     op.drop_table('submission')
     op.execute(DropSequence(Sequence('submission_id_seq')))

@@ -25,7 +25,7 @@ def downgrade(engine_name):
     globals()["downgrade_%s" % engine_name]()
 
 
-def upgrade_default():
+def upgrade_main():
     op.create_table('account_google',
         sa.Column('google_user_id', sa.String(), nullable=False),
         sa.Column('account_id', sa.Integer(), nullable=False),
@@ -49,8 +49,8 @@ def upgrade_default():
         sa.Column('name', sa.String(), nullable=False),
         sa.Column('version', sa.String(), nullable=False),
         sa.Column('apikey', sa.String(), nullable=False),
-        sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
-        sa.Column('active', sa.Boolean(), server_default=sa.text(u'true'), nullable=True),
+        sa.Column('created', sa.DateTime(timezone=True), server_main=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
+        sa.Column('active', sa.Boolean(), server_main=sa.text(u'true'), nullable=True),
         sa.Column('account_id', sa.Integer(), nullable=False),
         sa.Column('email', sa.String(), nullable=True),
         sa.Column('website', sa.String(), nullable=True),
@@ -85,7 +85,7 @@ def upgrade_default():
     )
     op.create_table('mirror_queue',
         sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('txid', sa.BigInteger(), server_default=sa.text(u'txid_current()'), nullable=False),
+        sa.Column('txid', sa.BigInteger(), server_main=sa.text(u'txid_current()'), nullable=False),
         sa.Column('tblname', sa.String(), nullable=False),
         sa.Column('op', sa.CHAR(length=1), nullable=False),
         sa.Column('data', sa.Text(), nullable=False),
@@ -95,8 +95,8 @@ def upgrade_default():
         sa.Column('id', sa.Integer(), autoincrement=False, nullable=False),
         sa.Column('acoustid', postgresql.UUID(), nullable=False),
         sa.Column('recording', postgresql.UUID(), nullable=False),
-        sa.Column('disabled', sa.Boolean(), server_default=sa.text(u'false'), nullable=False),
-        sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
+        sa.Column('disabled', sa.Boolean(), server_main=sa.text(u'false'), nullable=False),
+        sa.Column('created', sa.DateTime(timezone=True), server_main=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
         sa.Column('updated', sa.DateTime(timezone=True), nullable=True),
         sa.PrimaryKeyConstraint('id')
     )
@@ -112,7 +112,7 @@ def upgrade_default():
     op.create_table('stats',
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('name', sa.String(), nullable=False),
-        sa.Column('date', sa.Date(), server_default=sa.text(u'CURRENT_DATE'), nullable=False),
+        sa.Column('date', sa.Date(), server_main=sa.text(u'CURRENT_DATE'), nullable=False),
         sa.Column('value', sa.Integer(), nullable=False),
         sa.PrimaryKeyConstraint('id')
     )
@@ -123,8 +123,8 @@ def upgrade_default():
         sa.Column('date', sa.Date(), nullable=False),
         sa.Column('hour', sa.Integer(), nullable=False),
         sa.Column('application_id', sa.Integer(), nullable=False),
-        sa.Column('count_nohits', sa.Integer(), server_default=sa.text(u'0'), nullable=False),
-        sa.Column('count_hits', sa.Integer(), server_default=sa.text(u'0'), nullable=False),
+        sa.Column('count_nohits', sa.Integer(), server_main=sa.text(u'0'), nullable=False),
+        sa.Column('count_hits', sa.Integer(), server_main=sa.text(u'0'), nullable=False),
         sa.PrimaryKeyConstraint('id')
     )
     op.create_index('stats_lookups_idx_date', 'stats_lookups', ['date'], unique=False)
@@ -134,13 +134,13 @@ def upgrade_default():
         sa.Column('application_id', sa.Integer(), nullable=False),
         sa.Column('user_agent', sa.String(), nullable=False),
         sa.Column('ip', sa.String(), nullable=False),
-        sa.Column('count', sa.Integer(), server_default=sa.text(u'0'), nullable=False),
+        sa.Column('count', sa.Integer(), server_main=sa.text(u'0'), nullable=False),
         sa.PrimaryKeyConstraint('id')
     )
     op.create_index('stats_user_agents_idx_date', 'stats_user_agents', ['date'], unique=False)
     op.create_table('track',
         sa.Column('id', sa.Integer(), nullable=False),
-        sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
+        sa.Column('created', sa.DateTime(timezone=True), server_main=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
         sa.Column('new_id', sa.Integer(), nullable=True),
         sa.Column('gid', postgresql.UUID(), nullable=False),
         sa.ForeignKeyConstraint(['new_id'], ['track.id'], name=op.f('track_fk_new_id')),
@@ -152,10 +152,10 @@ def upgrade_default():
         sa.Column('name', sa.String(), nullable=False),
         sa.Column('apikey', sa.String(), nullable=False),
         sa.Column('mbuser', sa.String(), nullable=True),
-        sa.Column('anonymous', sa.Boolean(), server_default=sa.text(u'false'), nullable=True),
-        sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
+        sa.Column('anonymous', sa.Boolean(), server_main=sa.text(u'false'), nullable=True),
+        sa.Column('created', sa.DateTime(timezone=True), server_main=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
         sa.Column('lastlogin', sa.DateTime(timezone=True), nullable=True),
-        sa.Column('submission_count', sa.Integer(), server_default=sa.text(u'0'), nullable=False),
+        sa.Column('submission_count', sa.Integer(), server_main=sa.text(u'0'), nullable=False),
         sa.Column('application_id', sa.Integer(), nullable=True),
         sa.Column('application_version', sa.String(), nullable=True),
         sa.Column('created_from', postgresql.INET(), nullable=True),
@@ -170,7 +170,7 @@ def upgrade_default():
         sa.Column('length', sa.SmallInteger(), nullable=False),
         sa.Column('bitrate', sa.SmallInteger(), nullable=True),
         sa.Column('format_id', sa.Integer(), nullable=True),
-        sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text(u'CURRENT_TIMESTAMP'), nullable=False),
+        sa.Column('created', sa.DateTime(timezone=True), server_main=sa.text(u'CURRENT_TIMESTAMP'), nullable=False),
         sa.Column('track_id', sa.Integer(), nullable=False),
         sa.Column('submission_count', sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(['format_id'], ['format.id'], name=op.f('fingerprint_fk_format_id')),
@@ -193,10 +193,10 @@ def upgrade_default():
     op.create_table('track_mbid',
         sa.Column('track_id', sa.Integer(), nullable=False),
         sa.Column('mbid', postgresql.UUID(), nullable=False),
-        sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
+        sa.Column('created', sa.DateTime(timezone=True), server_main=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('submission_count', sa.Integer(), nullable=False),
-        sa.Column('disabled', sa.Boolean(), server_default=sa.text(u'false'), nullable=False),
+        sa.Column('disabled', sa.Boolean(), server_main=sa.text(u'false'), nullable=False),
         sa.ForeignKeyConstraint(['track_id'], ['track.id'], name=op.f('track_mbid_fk_track_id')),
         sa.PrimaryKeyConstraint('id')
     )
@@ -206,7 +206,7 @@ def upgrade_default():
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('track_id', sa.Integer(), nullable=False),
         sa.Column('meta_id', sa.Integer(), nullable=False),
-        sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
+        sa.Column('created', sa.DateTime(timezone=True), server_main=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
         sa.Column('submission_count', sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(['meta_id'], ['meta.id'], name=op.f('track_meta_fk_meta_id')),
         sa.ForeignKeyConstraint(['track_id'], ['track.id'], name=op.f('track_meta_fk_track_id')),
@@ -217,7 +217,7 @@ def upgrade_default():
     op.create_table('track_puid',
         sa.Column('track_id', sa.Integer(), nullable=False),
         sa.Column('puid', postgresql.UUID(), nullable=False),
-        sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
+        sa.Column('created', sa.DateTime(timezone=True), server_main=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('submission_count', sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(['track_id'], ['track.id'], name=op.f('track_puid_fk_track_id')),
@@ -253,7 +253,7 @@ def upgrade_default():
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('track_id', sa.Integer(), nullable=False),
         sa.Column('foreignid_id', sa.Integer(), nullable=False),
-        sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
+        sa.Column('created', sa.DateTime(timezone=True), server_main=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
         sa.Column('submission_count', sa.Integer(), nullable=False),
         sa.ForeignKeyConstraint(['foreignid_id'], ['foreignid.id'], name=op.f('track_foreignid_fk_foreignid_id')),
         sa.ForeignKeyConstraint(['track_id'], ['track.id'], name=op.f('track_foreignid_fk_track_id')),
@@ -265,7 +265,7 @@ def upgrade_default():
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('track_mbid_id', sa.Integer(), nullable=False),
         sa.Column('account_id', sa.Integer(), nullable=False),
-        sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
+        sa.Column('created', sa.DateTime(timezone=True), server_main=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
         sa.Column('disabled', sa.Boolean(), nullable=False),
         sa.Column('note', sa.Text(), nullable=True),
         sa.ForeignKeyConstraint(['account_id'], ['account.id'], name=op.f('track_mbid_change_fk_account_id')),
@@ -277,8 +277,8 @@ def upgrade_default():
         sa.Column('id', sa.Integer(), nullable=False),
         sa.Column('track_mbid_id', sa.Integer(), nullable=False),
         sa.Column('account_id', sa.Integer(), nullable=False),
-        sa.Column('handled', sa.Boolean(), server_default=sa.text(u'false'), nullable=False),
-        sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
+        sa.Column('handled', sa.Boolean(), server_main=sa.text(u'false'), nullable=False),
+        sa.Column('created', sa.DateTime(timezone=True), server_main=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
         sa.ForeignKeyConstraint(['account_id'], ['account.id'], name=op.f('track_mbid_flag_fk_account_id')),
         sa.ForeignKeyConstraint(['track_mbid_id'], ['track_mbid.id'], name=op.f('track_mbid_flag_fk_track_mbid_id')),
         sa.PrimaryKeyConstraint('id')
@@ -289,10 +289,10 @@ def upgrade_default():
         sa.Column('length', sa.SmallInteger(), nullable=False),
         sa.Column('bitrate', sa.SmallInteger(), nullable=True),
         sa.Column('format_id', sa.Integer(), nullable=True),
-        sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text(u'CURRENT_TIMESTAMP'), nullable=False),
+        sa.Column('created', sa.DateTime(timezone=True), server_main=sa.text(u'CURRENT_TIMESTAMP'), nullable=False),
         sa.Column('source_id', sa.Integer(), nullable=False),
         sa.Column('mbid', postgresql.UUID(), nullable=True),
-        sa.Column('handled', sa.Boolean(), server_default=sa.text(u'false'), nullable=True),
+        sa.Column('handled', sa.Boolean(), server_main=sa.text(u'false'), nullable=True),
         sa.Column('puid', postgresql.UUID(), nullable=True),
         sa.Column('meta_id', sa.Integer(), nullable=True),
         sa.Column('foreignid_id', sa.Integer(), nullable=True),
@@ -310,7 +310,7 @@ def upgrade_default():
         sa.Column('fingerprint_id', sa.Integer(), nullable=False),
         sa.Column('submission_id', sa.Integer(), nullable=False),
         sa.Column('source_id', sa.Integer(), nullable=False),
-        sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
+        sa.Column('created', sa.DateTime(timezone=True), server_main=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
         sa.ForeignKeyConstraint(['fingerprint_id'], ['fingerprint.id'], name=op.f('fingerprint_source_fk_fingerprint_id')),
         sa.ForeignKeyConstraint(['source_id'], ['source.id'], name=op.f('fingerprint_source_fk_source_id')),
         sa.ForeignKeyConstraint(['submission_id'], ['submission.id'], name=op.f('fingerprint_source_fk_submission_id')),
@@ -322,7 +322,7 @@ def upgrade_default():
         sa.Column('track_foreignid_id', sa.Integer(), nullable=False),
         sa.Column('submission_id', sa.Integer(), nullable=False),
         sa.Column('source_id', sa.Integer(), nullable=False),
-        sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
+        sa.Column('created', sa.DateTime(timezone=True), server_main=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
         sa.ForeignKeyConstraint(['source_id'], ['source.id'], name=op.f('track_foreignid_source_fk_source_id')),
         sa.ForeignKeyConstraint(['submission_id'], ['submission.id'], name=op.f('track_foreignid_source_fk_submission_id')),
         sa.ForeignKeyConstraint(['track_foreignid_id'], ['track_foreignid.id'], name=op.f('track_foreignid_source_fk_track_foreignid_id')),
@@ -333,7 +333,7 @@ def upgrade_default():
         sa.Column('track_mbid_id', sa.Integer(), nullable=False),
         sa.Column('submission_id', sa.Integer(), nullable=True),
         sa.Column('source_id', sa.Integer(), nullable=False),
-        sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
+        sa.Column('created', sa.DateTime(timezone=True), server_main=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
         sa.ForeignKeyConstraint(['source_id'], ['source.id'], name=op.f('track_mbid_source_fk_source_id')),
         sa.ForeignKeyConstraint(['submission_id'], ['submission.id'], name=op.f('track_mbid_source_fk_submission_id')),
         sa.ForeignKeyConstraint(['track_mbid_id'], ['track_mbid.id'], name=op.f('track_mbid_source_fk_track_mbid_id')),
@@ -346,7 +346,7 @@ def upgrade_default():
         sa.Column('track_meta_id', sa.Integer(), nullable=False),
         sa.Column('submission_id', sa.Integer(), nullable=False),
         sa.Column('source_id', sa.Integer(), nullable=False),
-        sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
+        sa.Column('created', sa.DateTime(timezone=True), server_main=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
         sa.ForeignKeyConstraint(['source_id'], ['source.id'], name=op.f('track_meta_source_fk_source_id')),
         sa.ForeignKeyConstraint(['submission_id'], ['submission.id'], name=op.f('track_meta_source_fk_submission_id')),
         sa.ForeignKeyConstraint(['track_meta_id'], ['track_meta.id'], name=op.f('track_meta_source_fk_track_meta_id')),
@@ -357,7 +357,7 @@ def upgrade_default():
         sa.Column('track_puid_id', sa.Integer(), nullable=False),
         sa.Column('submission_id', sa.Integer(), nullable=False),
         sa.Column('source_id', sa.Integer(), nullable=False),
-        sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
+        sa.Column('created', sa.DateTime(timezone=True), server_main=sa.text(u'CURRENT_TIMESTAMP'), nullable=True),
         sa.ForeignKeyConstraint(['source_id'], ['source.id'], name=op.f('track_puid_source_fk_source_id')),
         sa.ForeignKeyConstraint(['submission_id'], ['submission.id'], name=op.f('track_puid_source_fk_submission_id')),
         sa.ForeignKeyConstraint(['track_puid_id'], ['track_puid.id'], name=op.f('track_puid_source_fk_track_puid_id')),
@@ -365,7 +365,7 @@ def upgrade_default():
     )
 
 
-def downgrade_default():
+def downgrade_main():
     op.drop_table('track_puid_source')
     op.drop_table('track_meta_source')
     op.drop_index(op.f('track_mbid_source_idx_track_mbid_id'), table_name='track_mbid_source')
@@ -433,9 +433,9 @@ def downgrade_default():
     op.drop_table('account_google')
 
 
-def upgrade_slow():
+def upgrade_import():
     pass
 
 
-def downgrade_slow():
+def downgrade_import():
     pass

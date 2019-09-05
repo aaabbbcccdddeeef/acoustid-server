@@ -1,8 +1,8 @@
 CREATE DATABASE "acoustid";
 CREATE DATABASE "acoustid_test";
 
-CREATE DATABASE "acoustid_slow";
-CREATE DATABASE "acoustid_slow_test";
+CREATE DATABASE "acoustid_import";
+CREATE DATABASE "acoustid_import_test";
 
 \c acoustid
 create extension intarray;
@@ -16,13 +16,13 @@ create extension pgcrypto;
 create extension acoustid;
 create extension cube;
 
-\c acoustid_slow
+\c acoustid_import
 create extension intarray;
 create extension pgcrypto;
 create extension acoustid;
 create extension cube;
 
-\c acoustid_slow_test
+\c acoustid_import_test
 create extension intarray;
 create extension pgcrypto;
 create extension acoustid;

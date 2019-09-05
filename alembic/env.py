@@ -27,13 +27,13 @@ def include_object(db_name):
         if obj_type == "table":
             if obj.schema == "musicbrainz":
                 return False
-            bind_key = obj.info.get('bind_key', 'default')
+            bind_key = obj.info.get('bind_key', 'main')
             if bind_key != db_name:
                 return False
         if obj_type == "column":
             if obj.table.schema == "musicbrainz":
                 return False
-            bind_key = obj.table.info.get('bind_key', 'default')
+            bind_key = obj.table.info.get('bind_key', 'main')
             if bind_key != db_name:
                 return False
         return True

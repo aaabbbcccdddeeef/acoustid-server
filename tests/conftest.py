@@ -12,7 +12,7 @@ RECREATE_DB = True
 def get_tables_for_bind(metadata, bind_key):
     tables = []
     for table in metadata.sorted_tables:
-        if table.info.get('bind_key', 'default') == bind_key:
+        if table.info.get('bind_key', 'main') == bind_key:
             tables.append(table)
     return tables
 

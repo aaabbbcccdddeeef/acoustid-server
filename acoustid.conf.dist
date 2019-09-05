@@ -1,14 +1,31 @@
-[database]
-name=acoustid
+[databases]
+two_phase_commit=false
+
+[database:main]
 user=acoustid
-password=XXX
+password=acoustid
+name=acoustid
 host=localhost
 port=5432
 
-[database_slow]
-name=acoustid
+[database:import]
 user=acoustid
-password=XXX
+password=acoustid
+name=acoustid_import
+host=localhost
+port=5432
+
+[database:main_master]
+user=acoustid
+password=acoustid
+name=acoustid
+host=localhost
+port=5432
+
+[database:import_master]
+user=acoustid
+password=acoustid
+name=acoustid_import
 host=localhost
 port=5432
 

@@ -24,18 +24,18 @@ def downgrade(engine_name):
     globals()["downgrade_%s" % engine_name]()
 
 
-def upgrade_default():
+def upgrade_main():
     pass
 
 
-def downgrade_default():
+def downgrade_main():
     pass
 
 
-def upgrade_slow():
+def upgrade_import():
     op.create_table('submission_result',
         sa.Column('submission_id', sa.Integer(), autoincrement=False, nullable=False),
-        sa.Column('created', sa.DateTime(timezone=True), server_default=sa.text('CURRENT_TIMESTAMP'), nullable=False),
+        sa.Column('created', sa.DateTime(timezone=True), server_main=sa.text('CURRENT_TIMESTAMP'), nullable=False),
         sa.Column('account_id', sa.Integer(), nullable=False),
         sa.Column('application_id', sa.Integer(), nullable=False),
         sa.Column('application_version', sa.String(), nullable=True),
@@ -49,5 +49,5 @@ def upgrade_slow():
     )
 
 
-def downgrade_slow():
+def downgrade_import():
     op.drop_table('submission_result')
