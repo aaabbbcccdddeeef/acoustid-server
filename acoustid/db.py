@@ -1,8 +1,18 @@
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 from acoustid.tables import metadata
 
 
-Session = sessionmaker()
+class RoutingSession(Session):
+
+    def __init__(self, *args, **kwargs):
+        self._engines = kwargs.pop('engines', {})
+        super(RoutingSession, self).__init__(*args, **kwargs)
+
+    def get_bind(self, mapper=None, clause=None):
+        return super(RoutingSession, self).get_bind(mapper, clause)
+
+
+Session = sessionmaker(class_=RoutingSession)
 
 
 def get_bind_args(engines):
@@ -15,7 +25,10 @@ def get_bind_args(engines):
 
 
 def get_session_args(script):
-    kwargs = {'twophase': script.config.databases.use_two_phase_commit}
+    kwargs = {
+        'twophase': script.config.databases.use_two_phase_commit,
+        'engines': script.db_engines,
+    }
     kwargs.update(get_bind_args(script.db_engines))
     return kwargs
 

@@ -44,12 +44,12 @@ class BaseConfig(object):
 class DatabasesConfig(BaseConfig):
 
     def __init__(self):
-        self.modes = {'local', 'replica'}
+        self.modes = {'local', 'master'}
         self.names = {'main', 'import'}
         self.databases = {}
         for mode in self.modes:
             self.databases[mode] = {}
-            for name in self.name:
+            for name in self.names:
                 self.databases[mode][name] = DatabaseConfig()
         self.use_two_phase_commit = False
 
@@ -66,7 +66,8 @@ class DatabasesConfig(BaseConfig):
         for mode, db_configs in self.databases.items():
             for name, sub_config in db_configs.items():
                 sub_section = '{}:{}{}'.format(section, name, '_' + mode if mode != 'local' else '')
-                sub_config.read_section(parser, sub_section)
+                if parser.has_section(sub_section):
+                    sub_config.read_section(parser, sub_section)
 
     def read_env(self, prefix):
         read_env_item(self, 'use_two_phase_commit', prefix + 'TWO_PHASE_COMMIT', convert=str_to_bool)

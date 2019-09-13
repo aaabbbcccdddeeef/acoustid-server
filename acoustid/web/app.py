@@ -77,6 +77,11 @@ def make_application(config_filename=None, tests=False):
         except RuntimeError:
             return 0
 
+    def get_test_request_scope():
+        return 0
+
+    session_scope_func = get_test_request_scope if tests else get_flask_request_scope
+
     @app.teardown_request
     def close_db_session(*args, **kwargs):
         db.session.remove()
@@ -92,7 +97,7 @@ def make_application(config_filename=None, tests=False):
         return get_health_response(script, request)
 
     db.session_factory.configure(**get_session_args(script))
-    db.session = scoped_session(db.session_factory, scopefunc=get_flask_request_scope)
+    db.session = scoped_session(db.session_factory, scopefunc=session_scope_func)
 
     app.register_blueprint(general_page)
     app.register_blueprint(user_page)
