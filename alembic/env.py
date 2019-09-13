@@ -52,7 +52,7 @@ def run_migrations_offline():
     script output.
 
     """
-    for name, db_config in acoustid_config.databases.databases.items():
+    for name, db_config in acoustid_config.databases.databases['master'].items():
         logger.info("Migrating database %s" % name)
 
         context.configure(
@@ -74,7 +74,7 @@ def run_migrations_online():
 
     """
     engines = {}
-    for name, db_config in acoustid_config.databases.databases.items():
+    for name, db_config in acoustid_config.databases.databases['master'].items():
         engines[name] = rec = {}
         rec["engine"] = db_config.create_engine(poolclass=pool.NullPool)
 
