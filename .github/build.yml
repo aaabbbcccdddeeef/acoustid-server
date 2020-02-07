@@ -1,0 +1,31 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+
+  run-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python_version: [ '2.x', '3.x' ]
+
+    steps:
+
+      - name: Checkout source code
+        uses: actions/checkout@v1
+
+      - name: Setup python
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python_version }}
+
+      - name: Run Python 2.x tests
+        run: tox -e py2,mypy-py2,flake8-py2
+        if: matrix.python_version == '2.x'
+
+      - name: Run Python 3.x tests
+        run: tox -e py3,mypy-py3,flake8-py3
+        if: matrix.python_version == '3.x'
