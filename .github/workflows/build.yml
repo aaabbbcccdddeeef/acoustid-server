@@ -35,16 +35,6 @@ jobs:
         ports:
           - 6080/tcp
 
-    env:
-      ACOUSTID_TEST_DATABASE_APP_HOST: localhost
-      ACOUSTID_TEST_DATABASE_APP_PORT: ${{ job.services.postgresql.ports['5432'] }}
-      ACOUSTID_TEST_DATABASE_APP_RO_HOST: localhost
-      ACOUSTID_TEST_DATABASE_APP_RO_PORT: ${{ job.services.postgresql.ports['5432'] }}
-      ACOUSTID_TEST_REDIS_HOST: localhost
-      ACOUSTID_TEST_REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
-      ACOUSTID_TEST_INDEX_HOST: localhost
-      ACOUSTID_TEST_INDEX_PORT: ${{ job.services.index.ports['6080'] }}
-
     steps:
 
       - name: Checkout source code
@@ -58,10 +48,14 @@ jobs:
       - name: Install additional python requirements
         run: pip install tox
 
-      - name: Run Python 2.x tests
-        run: tox -e py2,mypy-py2,flake8-py2
-        if: matrix.python_version == '2.x'
-
-      - name: Run Python 3.x tests
-        run: tox -e py3,mypy-py3,flake8-py3
-        if: matrix.python_version == '3.x'
+      - name: Run tests
+        run: tox
+        env:
+          ACOUSTID_TEST_DATABASE_APP_HOST: localhost
+          ACOUSTID_TEST_DATABASE_APP_PORT: ${{ job.services.postgresql.ports['5432'] }}
+          ACOUSTID_TEST_DATABASE_APP_RO_HOST: localhost
+          ACOUSTID_TEST_DATABASE_APP_RO_PORT: ${{ job.services.postgresql.ports['5432'] }}
+          ACOUSTID_TEST_REDIS_HOST: localhost
+          ACOUSTID_TEST_REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
+          ACOUSTID_TEST_INDEX_HOST: localhost
+          ACOUSTID_TEST_INDEX_PORT: ${{ job.services.index.ports['6080'] }}
