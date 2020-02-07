@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python_version: [ '2.x', '3.x' ]
+        python_version: [ '3.5' ]
 
     services:
       postgresql:
@@ -45,11 +45,14 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
 
+      - name: Lint on the source code
+        run: tox -e mypy-py3,flake8-py3
+
       - name: Install additional requirements
         run: |
           pip install tox
           sudo apt-get update
-          sudo apt-get install libchromaprint1
+          sudo apt-get install libchromaprint1 libpq-dev
 
       - name: Setup database
         run: |
@@ -61,10 +64,7 @@ jobs:
           PGDATABASE: postgres
 
       - name: Run tests
-        run: |
-          sed -i 's/psycopg2/psycopg2-binary/' requirements_py2.txt
-          sed -i 's/psycopg2/psycopg2-binary/' requirements_py3.txt
-          tox
+        run: tox -e py3
         env:
           ACOUSTID_TEST_DATABASE_APP_HOST: localhost
           ACOUSTID_TEST_DATABASE_APP_PORT: ${{ job.services.postgresql.ports['5432'] }}
