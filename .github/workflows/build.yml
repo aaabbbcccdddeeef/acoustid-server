@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python_version: [ '3.6' ]
+        python_version: [ '2.7', '3.6' ]
 
     services:
       postgresql:
@@ -49,7 +49,15 @@ jobs:
         run: pip install tox
 
       - name: Lint on the source code
-        run: tox -e mypy-py3,flake8-py3
+        run: |
+          if [[ $PYTHON_VERSION =~ ^2 ]]
+          then
+            tox -e flake8-py2
+          else
+            tox -e mypy-py3,mypy-py2,flake8-py3
+          fi
+        env:
+          PYTHON_VERSION: ${{ matrix.python_version }}
 
       - name: Install additional requirements
         run: |
@@ -66,8 +74,15 @@ jobs:
           PGDATABASE: postgres
 
       - name: Run tests
-        run: tox -e py3
+        run: |
+          if [[ $PYTHON_VERSION =~ ^2 ]]
+          then
+            tox -e py2
+          else
+            tox -e py3
+          fi
         env:
+          PYTHON_VERSION: ${{ matrix.python_version }}
           ACOUSTID_TEST_DATABASE_APP_HOST: localhost
           ACOUSTID_TEST_DATABASE_APP_PORT: ${{ job.services.postgresql.ports['5432'] }}
           ACOUSTID_TEST_DATABASE_APP_RO_HOST: localhost
