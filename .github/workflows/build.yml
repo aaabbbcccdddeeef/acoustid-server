@@ -12,15 +12,51 @@ jobs:
       matrix:
         python_version: [ '2.x', '3.x' ]
 
+    services:
+      postgresql:
+        image: quay.io/acoustid/postgres:master
+        ports:
+          - 5432/tcp
+        env:
+          POSTGRES_USER: acoustid
+          POSTGRES_PASSWORD: acoustid
+          POSTGRES_DB: acoustid_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis
+        ports:
+          - 6379/tcp
+      index:
+        image: quay.io/acoustid/acoustid-index:2018.01.13
+        ports:
+          - 6080/tcp
+
+    env:
+      ACOUSTID_TEST_DATABASE_APP_HOST: localhost
+      ACOUSTID_TEST_DATABASE_APP_PORT: ${{ job.services.postgresql.ports['5432'] }}
+      ACOUSTID_TEST_DATABASE_APP_RO_HOST: localhost
+      ACOUSTID_TEST_DATABASE_APP_RO_PORT: ${{ job.services.postgresql.ports['5432'] }}
+      ACOUSTID_TEST_REDIS_HOST: localhost
+      ACOUSTID_TEST_REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
+      ACOUSTID_TEST_INDEX_HOST: localhost
+      ACOUSTID_TEST_INDEX_PORT: ${{ job.services.index.ports['6080'] }}
+
     steps:
 
       - name: Checkout source code
         uses: actions/checkout@v1
 
-      - name: Setup python
+      - name: Install python
         uses: actions/setup-python@v1
         with:
           python-version: ${{ matrix.python_version }}
+
+      - name: Install additional python requirements
+        run: pip install tox
 
       - name: Run Python 2.x tests
         run: tox -e py2,mypy-py2,flake8-py2
