@@ -45,8 +45,10 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
 
-      - name: Install additional python requirements
-        run: pip install tox
+      - name: Install additional requirements
+        run: |
+          pip install tox
+          apt-get install libchromaprint1
 
       - name: Run tests
         run: |
