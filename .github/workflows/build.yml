@@ -48,7 +48,7 @@ jobs:
       - name: Install additional requirements
         run: |
           pip install tox
-          apt-get install libchromaprint1
+          sudo apt-get install libchromaprint1
 
       - name: Run tests
         run: |
