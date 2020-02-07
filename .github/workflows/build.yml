@@ -164,8 +164,8 @@ jobs:
       - name: Build image
         run: |
           docker build \
-            --build-arg=IMAGE=${{ steps.info.outputs.IMAGE }}
-            --build-arg=VERSION=${{ steps.info.outputs.VERSION }}
+            --build-arg=IMAGE=${{ steps.info.outputs.IMAGE }} \
+            --build-arg=VERSION=${{ steps.info.outputs.VERSION }} \
             -f Dockerfile.${{ matrix.component }} \
             -t ${{ steps.info.outputs.IMAGE }}:${{ steps.info.outputs.VERSION }}-${{ matrix.component }} \
             .
