@@ -20,7 +20,7 @@ jobs:
         env:
           POSTGRES_USER: acoustid
           POSTGRES_PASSWORD: acoustid
-          POSTGRES_DB: acoustid_test
+          POSTGRES_DB: postgres
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -51,6 +51,15 @@ jobs:
           sudo apt-get update
           sudo apt-get install libchromaprint1
 
+      - name: Setup database
+        run: |
+          container=$(docker ps -q -f expose=5432)
+          docker exec -i -e PGUSER=$PGUSER -e PGPASSWORD=$PGPASSWORD -e PGDATABASE=$PGDATABASE $container psql < ./admin/ci/create_db.sql
+        env:
+          PGUSER: acoustid
+          PGPASSWORD: acoustid
+          PGDATABASE: postgres
+
       - name: Run tests
         run: |
           sed -i 's/psycopg2/psycopg2-binary/' requirements_py2.txt
@@ -61,6 +70,18 @@ jobs:
           ACOUSTID_TEST_DATABASE_APP_PORT: ${{ job.services.postgresql.ports['5432'] }}
           ACOUSTID_TEST_DATABASE_APP_RO_HOST: localhost
           ACOUSTID_TEST_DATABASE_APP_RO_PORT: ${{ job.services.postgresql.ports['5432'] }}
+          ACOUSTID_TEST_DATABASE_FINGERPRINT_HOST: localhost
+          ACOUSTID_TEST_DATABASE_FINGERPRINT_PORT: ${{ job.services.postgresql.ports['5432'] }}
+          ACOUSTID_TEST_DATABASE_FINGERPRINT_RO_HOST: localhost
+          ACOUSTID_TEST_DATABASE_FINGERPRINT_RO_PORT: ${{ job.services.postgresql.ports['5432'] }}
+          ACOUSTID_TEST_DATABASE_INGEST_HOST: localhost
+          ACOUSTID_TEST_DATABASE_INGEST_PORT: ${{ job.services.postgresql.ports['5432'] }}
+          ACOUSTID_TEST_DATABASE_INGEST_RO_HOST: localhost
+          ACOUSTID_TEST_DATABASE_INGEST_RO_PORT: ${{ job.services.postgresql.ports['5432'] }}
+          ACOUSTID_TEST_DATABASE_MUSICBRAINZ_HOST: localhost
+          ACOUSTID_TEST_DATABASE_MUSICBRAINZ_PORT: ${{ job.services.postgresql.ports['5432'] }}
+          ACOUSTID_TEST_DATABASE_MUSICBRAINZ_RO_HOST: localhost
+          ACOUSTID_TEST_DATABASE_MUSICBRAINZ_RO_PORT: ${{ job.services.postgresql.ports['5432'] }}
           ACOUSTID_TEST_REDIS_HOST: localhost
           ACOUSTID_TEST_REDIS_PORT: ${{ job.services.redis.ports['6379'] }}
           ACOUSTID_TEST_INDEX_HOST: localhost
