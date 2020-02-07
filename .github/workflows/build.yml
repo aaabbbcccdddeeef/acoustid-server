@@ -104,9 +104,10 @@ jobs:
           ACOUSTID_TEST_INDEX_HOST: localhost
           ACOUSTID_TEST_INDEX_PORT: ${{ job.services.index.ports['6080'] }}
 
-  build:
+  build-base:
     runs-on: ubuntu-latest
     needs: [ test ]
+
     steps:
     
       - name: Check out code
@@ -131,3 +132,45 @@ jobs:
         run: |
           echo ${{ secrets.QUAY_PASSWORD }} | docker login quay.io -u ${{ secrets.QUAY_USERNAME }} --password-stdin
           docker push ${{ steps.info.outputs.IMAGE }}:${{ steps.info.outputs.VERSION }}
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [ build-base ]
+    strategy:
+      matrix:
+        component:
+          - static
+          - api
+          - web
+          - cron
+          - import
+
+    steps:
+    
+      - name: Check out code
+        uses: actions/checkout@v1
+
+      - name: Check version details
+        id: info
+        run: |
+          echo ::set-output name=IMAGE::quay.io/acoustid/acoustid-server
+          if [[ $GITHUB_REF == refs/tags/v* ]]
+          then
+            echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d'/' -f3 | sed 's/^v//')
+          else
+            echo ::set-output name=VERSION::$(echo $GITHUB_REF | cut -d'/' -f3)
+          fi
+  
+      - name: Build image
+        run: |
+          docker build \
+            --build-arg=IMAGE=${{ steps.info.outputs.IMAGE }}
+            --build-arg=VERSION=${{ steps.info.outputs.VERSION }}
+            -f Dockerfile.${{ matrix.component }} \
+            -t ${{ steps.info.outputs.IMAGE }}:${{ steps.info.outputs.VERSION }}-${{ matrix.component }} \
+            .
+  
+      - name: Push image
+        run: |
+          echo ${{ secrets.QUAY_PASSWORD }} | docker login quay.io -u ${{ secrets.QUAY_USERNAME }} --password-stdin
+          docker push ${{ steps.info.outputs.IMAGE }}:${{ steps.info.outputs.VERSION }}-${{ matrix.component }}
