@@ -4,19 +4,28 @@
 import logging
 from typing import List, Dict, Any, Iterable
 from sqlalchemy import sql
+from redis import Redis
 from acoustid import tables as schema
 from acoustid.db import MusicBrainzDB
 
 logger = logging.getLogger(__name__)
 
 
-def _load_artists(conn, artist_credit_ids):
+ARTIST_CACHE_TTL = 60 * 60
+
+
+def artist_cache_key(artist_credit_id):
+    # type: (int) -> str
+    return 'mb:artist:{}'.format(artist_credit_ids)
+
+
+def _load_artists_from_db(conn, artist_credit_ids):
     # type: (MusicBrainzDB, Iterable[int]) -> Dict[int, List[Dict[str, Any]]]
     if not artist_credit_ids:
         return {}
     src = schema.mb_artist_credit_name
     src = src.join(schema.mb_artist)
-    condition = schema.mb_artist_credit_name.c.artist_credit.in_(artist_credit_ids)
+    condition = schema.mb_artist_credit_name.c.artist_credit.in_(remaining_artist_credit_ids)
     columns = [
         schema.mb_artist_credit_name.c.name,
         schema.mb_artist_credit_name.c.artist_credit,
@@ -26,7 +35,7 @@ def _load_artists(conn, artist_credit_ids):
     query = sql.select(columns, condition, from_obj=src).\
         order_by(schema.mb_artist_credit_name.c.artist_credit,
                  schema.mb_artist_credit_name.c.position)
-    result = {}  # type: Dict[int, List[Dict[str, Any]]]
+    results = {}  # type: Dict[int, List[Dict[str, Any]]]
     for row in conn.execute(query):
         ac_data = {
             'id': row['gid'],
@@ -34,7 +43,44 @@ def _load_artists(conn, artist_credit_ids):
         }
         if row['join_phrase']:
             ac_data['joinphrase'] = row['join_phrase']
-        result.setdefault(row['artist_credit'], []).append(ac_data)
+        results.setdefault(row['artist_credit'], []).append(ac_data)
+    return results
+
+
+def _load_artists(cache, db, artist_credit_ids):
+    # type: (Cache, MusicBrainzDB, Iterable[int]) -> Dict[int, List[Dict[str, Any]]]
+    results = {}  # type: Dict[int, List[Dict[str, Any]]]
+
+    if not artist_credit_ids:
+        return results
+
+    artist_credit_ids = list(artist_credit_ids)
+
+    cache_keys = [artist_cache_key(artist_credit_id) for artist_credit_id in artist_credit_ids]
+    cached_results = redis.mget(cache_keys)
+
+    for i, result in enumerate(cached_results):
+        artist_credit_id = artist_credit_ids[i]
+        if result is not None:
+            cache_key = artist_cache_key(artist_credit_id)
+            try:
+                results[artist_credit_id] = json.loads(result)
+            except json.JSONDecodeError:
+                redis.delete(cache_key)
+
+    cached_artist_credit_ids = set(results.keys())
+
+    remaining_artist_credit_ids = set(artist_credit_ids) - cached_artist_credit_ids
+    if not remaining_artist_credit_ids:
+        return results
+
+    remaining_results = _load_artists_from_db(db, remaining_artist_credit_ids)
+    for artist_credit_id, result in remaining_results.items():
+        results[artist_credit_id] = result
+
+    for artist_credit_id, result in results.items():
+        redis.set(artist_credit)
+
     return result
 
 
