@@ -59,6 +59,8 @@ class IndexClient(Index):
         self.in_transaction = False
         self.created = time.time()
         self.sock = None
+        self._last_search_timeout = 0.0
+        self._last_search_max_results = 0
         self._buffer = b''
         self._connect()
 
@@ -86,10 +88,8 @@ class IndexClient(Index):
         # type: (str) -> None
         self.sock.sendall(b'%s%s' % (line.encode('utf8'), CRLF))
 
-    def _getline(self, timeout=None):
+    def _getline(self, timeout):
         pos = self._buffer.find(CRLF)
-        if timeout is None:
-            timeout = self.timeout
         deadline = time.time() + timeout
         while pos == -1:
             try:
@@ -121,6 +121,8 @@ class IndexClient(Index):
         return line.decode('utf8')
 
     def _request(self, request, timeout=None):
+        if timeout is None:
+            timeout = self.timeout
         self._putline(request)
         line = self._getline(timeout=timeout)
         if line.startswith('OK '):
@@ -138,8 +140,16 @@ class IndexClient(Index):
         self._request('set attribute %s %s' % (name, value))
         return True
 
-    def search(self, fingerprint):
-        line = self._request('search %s' % (encode_fp(fingerprint),))
+    def search(self, fingerprint, max_results=100, timeout=None):
+        if timeout is None:
+            timeout = self.timeout
+        if self._last_search_timeout != timeout:
+            self.set_attribute('timeout', int(timeout * 1000))
+            self._last_search_timeout = timeout
+        if self._last_search_max_results != max_results:
+            self.set_attribute('max_results', max_results)
+            self._last_search_max_results = max_results
+        line = self._request('search %s' % (encode_fp(fingerprint),), timeout)
         if not line:
             return []
         matches = [Result(*map(int, r.split(':'))) for r in line.split(' ')]

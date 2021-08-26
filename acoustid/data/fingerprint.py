@@ -81,7 +81,8 @@ class FingerprintSearcher(object):
         fp_query = self.db.execute(sql.select([sql.func.acoustid_extract_query(fp)])).scalar()
         if not fp_query:
             return None
-        results = index.search(fp_query)
+
+        results = index.search(fp_query, max_results=max_candidates, timeout=self.timeout)
         if not results:
             return None
 
